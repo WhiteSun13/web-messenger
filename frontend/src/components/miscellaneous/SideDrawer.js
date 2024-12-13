@@ -20,9 +20,10 @@ import {
   DrawerBody,
   Input,
   Spinner,
-  effect,
+  useColorMode,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import { BellIcon, SunIcon, MoonIcon} from "@chakra-ui/icons";
 import { ChatState } from "../../Context/ChatProvider";
 import ProfileModal from "./ProfileModal";
 import axios from "axios";
@@ -37,6 +38,7 @@ function SideDrawer() {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
+  const { colorMode, toggleColorMode } = useColorMode(); // Используем состояние и функцию переключения темы
   const {
     user,
     setSelectedChat,
@@ -128,7 +130,7 @@ function SideDrawer() {
         d="flex"
         justifyContent="space-between"
         alignItems="center"
-        bg="white"
+        bg={useColorModeValue("white", "#2d3748")}
         w="100%"
         p="5px 10px 5px 10px"
         borderWidth="0px"
@@ -165,14 +167,24 @@ function SideDrawer() {
             </MenuList>
           </Menu>
 
+          <Tooltip label={colorMode === "light" ? "Тёмная тема" : "Светлая тема"} hasArrow placement="bottom-end">
+            <Button p={1} onClick={toggleColorMode} variant="ghost">
+              {colorMode === "light" ? (
+                <MoonIcon fontSize="2xl" m={2} />
+                ) : (
+                <SunIcon fontSize="2xl" m={2} />
+              )}
+            </Button>
+          </Tooltip>
+
           <Menu>
-          {/* rightIcon={<ChevronDownIcon />} */}
-            <MenuButton as={Button} bg="transperent">
+            <MenuButton ml={2} p={1} as={Button} bg="transparent">
               <Avatar
                 size="sm"
                 cursor="pointer"
                 name={user.name}
                 src={user.pic}
+                m={2}
               />
             </MenuButton>
             <MenuList>

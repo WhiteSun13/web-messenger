@@ -8,7 +8,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Text,
+  useColorModeValue
 } from "@chakra-ui/react";
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
@@ -26,7 +26,7 @@ function Home() {
 
   return (
     <Container maxW="xl" centerContent>
-      <Box bg="white" w="100%" p={4} m="5% 0 0 0" borderRadius="lg" borderWidth="1px">
+      <Box bg={useColorModeValue("white", "#2d3748")} w="100%" p={4} m="5% 0 0 0" borderRadius="lg" borderWidth="1px">
         <Tabs variant="soft-rounded">
           <TabList mb="1em">
             <Tab width="50%">Вход</Tab>

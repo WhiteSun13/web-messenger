@@ -5,7 +5,7 @@ import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import ChatLoading from "./ChatLoading";
-import { Button } from "@chakra-ui/react";
+import { Button, useColorMode, useColorModeValue, } from "@chakra-ui/react";
 import { ChatState } from "../Context/ChatProvider";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
@@ -16,6 +16,9 @@ function MyChats({ fetchAgain }) {
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
 
   const toast = useToast();
+
+  const bgColor = useColorModeValue("white", "#2d3748");
+  const txtColor = useColorModeValue("black", "white");
 
   const fetchChats = async () => {
     try {
@@ -73,7 +76,8 @@ function MyChats({ fetchAgain }) {
             d="flex"
             fontSize={{ base: "17px", md: "10px", lg: "17px" }}
             rightIcon={<AddIcon />}
-            color="#000000"
+            color={useColorModeValue("black", "white")}
+            bg={useColorModeValue("white", "#2d3748")}
           >
             Новая группа
           </Button>
@@ -96,8 +100,8 @@ function MyChats({ fetchAgain }) {
                 onClick={() => setSelectedChat(chat)}
                 d="flex"
                 cursor="pointer"
-                bg={selectedChat === chat ? "#38B2AC" : "white"}
-                color={selectedChat === chat ? "white" : "black"}
+                bg={selectedChat === chat ? "#1ca9c9" : bgColor}
+                color={selectedChat === chat ? "white" : txtColor}
                 px={3}
                 py={2}
                 borderRadius="lg"

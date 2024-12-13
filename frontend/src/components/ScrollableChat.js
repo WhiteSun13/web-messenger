@@ -1,4 +1,4 @@
-import { Avatar, Tooltip } from "@chakra-ui/react";
+import { Avatar, Tooltip, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import ScrollableFeed from "react-scrollable-feed";
 import {
   isLastMessage,
@@ -39,6 +39,7 @@ function ScrollableChat({ messages }) {
                 borderRadius: "20px",
                 padding: "5px 15px",
                 maxWidth: "75%",
+                color: "black"
               }}
             >
               {m.content}

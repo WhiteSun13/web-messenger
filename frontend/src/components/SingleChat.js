@@ -1,7 +1,7 @@
 import { FormControl } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
 import { Box, Text } from "@chakra-ui/layout";
-import { IconButton, Spinner, useToast } from "@chakra-ui/react";
+import { IconButton, Spinner, useToast, useColorMode, useColorModeValue,} from "@chakra-ui/react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -25,6 +25,8 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
+  const { colorMode } = useColorMode();
+  const txtColorModeValue = useColorModeValue("black","white");
 
   const defaultOptions = {
     loop: true,
@@ -188,7 +190,7 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
               d={{ base: "flex", md: "none" }}
               icon={<ArrowBackIcon />}
               onClick={() => setSelectedChat("")}
-              color="black"
+              color={txtColorModeValue}
             />
             {!selectedChat.isGroupChat ? (
               <>
@@ -213,7 +215,8 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
             flexDir="column"
             justifyContent="flex-end"
             p={3}
-            bg="white"
+            variant="filled"
+            bg={colorMode === "light" ? "white" : "#2d3748"}
             w="100%"
             h="100%"
             borderRadius="lg"
@@ -252,7 +255,6 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
               )}
               <Input
                 variant="filled"
-                bg="#E0E0E0"
                 placeholder="Введите сообщение..."
                 value={newMessage}
                 onChange={typingHandler}

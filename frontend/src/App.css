@@ -3,7 +3,7 @@
 .App {
   min-height: 100vh;
   display: flex;
-  background: #009590 linear-gradient(190deg,#0f3460 40%,transparent 70%) top left no-repeat;;
+  /* background: #009590; */
   background-image: url("./hero-bg.svg");
   background-position: center;
   background-size: cover;
