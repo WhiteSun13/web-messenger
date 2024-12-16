@@ -1,11 +1,11 @@
 import { FormControl } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
-import { Box, Text } from "@chakra-ui/layout";
-import { IconButton, Spinner, useToast, useColorMode, useColorModeValue,} from "@chakra-ui/react";
+import { Box, Text, Image } from "@chakra-ui/react";
+import { IconButton, Spinner, useToast, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ArrowBackIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon, AttachmentIcon } from "@chakra-ui/icons";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import { ChatState } from "../Context/ChatProvider";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
@@ -22,25 +22,18 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFilePreview, setSelectedFilePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
   const { colorMode } = useColorMode();
-  const txtColorModeValue = useColorModeValue("black","white");
-
-  const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: animationData,
-    rendererSettings: {
-      preserveAspectRatio: "xMidYMid slice",
-    },
-  };
+  const txtColorModeValue = useColorModeValue("black", "white");
 
   const toast = useToast();
 
-  const { selectedChat, setSelectedChat, user, notification, setNotification } =
-    ChatState();
+  const { selectedChat, setSelectedChat, user, notification, setNotification } = ChatState();
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
@@ -54,12 +47,7 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
 
       setLoading(true);
 
-      const { data } = await axios.get(
-        `/api/message/${selectedChat._id}`,
-        config
-      );
-
-      //console.log(data);
+      const { data } = await axios.get(`/api/message/${selectedChat._id}`, config);
 
       setMessages(data);
       setLoading(false);
@@ -67,13 +55,75 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
       socket.emit("join chat", selectedChat._id);
     } catch (error) {
       toast({
-        title: "Error Occured!",
-        description: "Failed to Load the Messages",
+        title: "Ошибка!",
+        description: "Не удалось загрузить сообщения.",
         status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom",
       });
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setSelectedFilePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const sendMessage = async (e) => {
+    if (e.key === "Enter" && (newMessage || selectedFile)) {
+      socket.emit("stop typing", selectedChat._id);
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        let imageUrl;
+        if (selectedFile) {
+          setUploadingImage(true);
+          const formData = new FormData();
+          formData.append("file", selectedFile);
+          formData.append("upload_preset", "chat-app");
+          formData.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
+
+          const { data } = await axios.post(
+            `https://api.cloudinary.com/v1_1/dkrhez4sn/image/upload`,
+            formData
+          );
+          imageUrl = data.url;
+          setUploadingImage(false);
+        }
+
+        const messageData = {
+          content: newMessage,
+          chatId: selectedChat._id,
+          image: imageUrl || undefined,
+        };
+
+        setNewMessage("");
+        setSelectedFile(null);
+        setSelectedFilePreview(null);
+
+        const { data } = await axios.post("/api/message", messageData, config);
+
+        socket.emit("new message", data);
+        setMessages([...messages, data]);
+      } catch (error) {
+        toast({
+          title: "Ошибка!",
+          description: "Не удалось отправить сообщение.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
     }
   };
 
@@ -87,65 +137,38 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
 
   useEffect(() => {
     fetchMessages();
-
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
   useEffect(() => {
+    const processedNotifications = new Set(); // Набор для отслеживания отправленных уведомлений
+  
     socket.on("message received", (newMessageReceived) => {
       if (
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessageReceived.chat._id
       ) {
-        // set notifications
-        if (!notification.includes(newMessageReceived)) {
+        // Проверяем, было ли уже отправлено уведомление для этого сообщения
+        if (
+          !notification.includes(newMessageReceived) &&
+          !processedNotifications.has(newMessageReceived._id)
+        ) {
           setNotification([newMessageReceived, ...notification]);
+          processedNotifications.add(newMessageReceived._id); // Добавляем ID сообщения в набор
           setFetchAgain(!fetchAgain);
+  
+          if (Notification.permission === "granted") {
+            new Notification(newMessageReceived.chat.users[0].name, {
+              body: newMessageReceived.content,
+            });
+          }
         }
       } else {
         setMessages([...messages, newMessageReceived]);
       }
     });
-  });
-
-  console.log(notification, "----------d-----------------");
-
-  const sendMessage = async (e) => {
-    if (e.key === "Enter" && newMessage) {
-      socket.emit("stop typing", selectedChat._id);
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
-
-        setNewMessage("");
-
-        const { data } = await axios.post(
-          "/api/message",
-          { content: newMessage, chatId: selectedChat._id },
-          config
-        );
-
-        console.log(data);
-
-        socket.emit("new message", data);
-
-        setMessages([...messages, data]);
-      } catch (error) {
-        toast({
-          title: "Error Occured!",
-          description: "Failed to send the Message",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom",
-        });
-      }
-    }
-  };
+  }, [selectedChat, messages, notification, fetchAgain]);
+  
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
@@ -194,13 +217,12 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
             />
             {!selectedChat.isGroupChat ? (
               <>
-                {getSender(user, selectedChat.users)}
-                <ProfileModal user={getSenderFull(user, selectedChat.users)} />
+                {getSender(selectedChat.users)}
+                <ProfileModal user={getSenderFull(selectedChat.users)} />
               </>
             ) : (
               <>
                 {selectedChat.chatName.toUpperCase()}
-
                 <UpdateGroupChatModal
                   fetchAgain={fetchAgain}
                   setFetchAgain={setFetchAgain}
@@ -223,51 +245,68 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
             overflowY="hidden"
           >
             {loading ? (
-              <Spinner
-                size="xl"
-                w={20}
-                h={20}
-                alignSelf="center"
-                margin="auto"
-              />
+              <Spinner size="xl" w={20} h={20} alignSelf="center" margin="auto" />
             ) : (
               <div className="messages">
                 <ScrollableChat messages={messages} />
               </div>
             )}
 
-            <FormControl
-              onKeyDown={sendMessage}
-              id="first-name"
-              isRequired
-              mt={3}
-            >
-              {istyping ? (
-                <div>
-                  <Lottie
-                    options={defaultOptions}
-                    width={70}
-                    style={{ marginBottom: 15, marginLeft: 0 }}
-                  />
-                </div>
-              ) : (
-                <></>
-              )}
+            {selectedFilePreview && (
+              <Box mb={3}>
+                <Image
+                  src={selectedFilePreview}
+                  alt="Превью изображения"
+                  maxW="100%"
+                  maxH="200px"
+                  borderRadius="md"
+                />
+              </Box>
+            )}
+
+            {istyping && (
+              <Box mb={3}>
+                <Lottie
+                  options={{
+                    loop: true,
+                    autoplay: true,
+                    animationData: animationData,
+                    rendererSettings: {
+                      preserveAspectRatio: "xMidYMid slice",
+                    },
+                  }}
+                  width={70}
+                  style={{ marginBottom: 15, marginLeft: 0 }}
+                />
+              </Box>
+            )}
+
+            <FormControl onKeyDown={sendMessage} isRequired mt={3} d="flex" alignItems="center">
               <Input
                 variant="filled"
                 placeholder="Введите сообщение..."
                 value={newMessage}
                 onChange={typingHandler}
+                flex="1"
+              />
+              <IconButton
+                as="label"
+                htmlFor="file-input"
+                icon={<AttachmentIcon />}
+                colorScheme="teal"
+                variant="ghost"
+                isDisabled={uploadingImage}
+                ml={2}
+              />
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                isDisabled={uploadingImage}
+                display="none"
+                id="file-input"
               />
             </FormControl>
-            <FormControl id="file-upload" mt={3}>
-  <Input
-    type="file"
-    accept="image/*"
-    onChange={()=>{}}//{handleFileUpload}
-    bg="#E0E0E0"
-  />
-</FormControl>
           </Box>
         </>
       ) : null}

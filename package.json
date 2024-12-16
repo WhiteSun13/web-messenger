@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@chakra-ui/react": "^2.2.8",
+    "@dicebear/avatars": "^4.10.8",
+    "@dicebear/avatars-identicon-sprites": "^4.10.8",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "axios": "^0.27.2",

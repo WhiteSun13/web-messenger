@@ -161,7 +161,7 @@ function SideDrawer() {
                 >
                   {notif.chat.isGroupChat
                     ? `Новое сообщение в ${notif.chat.chatName}`
-                    : `Новое сообщение от ${getSender(user, notif.chat.users)}`}
+                    : `Новое сообщение от ${getSender(notif.chat.users)}`}
                 </MenuItem>
               ))}
             </MenuList>

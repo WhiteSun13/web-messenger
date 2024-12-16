@@ -1,8 +1,10 @@
-export const getSender = (loggedUser, user) => {
+export const getSender = (user) => {
+  const loggedUser = JSON.parse(localStorage.getItem("userInfo"))
   return user[0]._id === loggedUser._id ? user[1].name : user[0].name;
 };
 
-export const getSenderFull = (loggedUser, user) => {
+export const getSenderFull = (user) => {
+  const loggedUser = JSON.parse(localStorage.getItem("userInfo"))
   return user[0]._id === loggedUser._id ? user[1] : user[0];
 };
 

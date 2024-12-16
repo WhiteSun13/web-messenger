@@ -1,6 +1,14 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
+function generateSecureRandomString(length) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const array = new Uint32Array(length);
+  crypto.getRandomValues(array);
+
+  return Array.from(array, (num) => chars[num % chars.length]).join('');
+}
+
 const userSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -9,7 +17,7 @@ const userSchema = mongoose.Schema(
     pic: {
       type: String,
       default:
-        "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+        `https://api.dicebear.com/9.x/identicon/png?size=750&backgroundColor=ffffff&seed=${generateSecureRandomString(20)}`,
     },
     isAdmin: {
       type: Boolean,

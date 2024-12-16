@@ -93,48 +93,51 @@ function MyChats({ fetchAgain }) {
         borderRadius="lg"
         overflowY="hidden"
       >
-        {chats ? (
-          <Stack overflowY="scroll">
-            {chats.map((chat) => (
-              <Box
-                onClick={() => setSelectedChat(chat)}
-                d="flex"
-                cursor="pointer"
-                bg={selectedChat === chat ? "#1ca9c9" : bgColor}
-                color={selectedChat === chat ? "white" : txtColor}
-                px={3}
-                py={2}
-                borderRadius="lg"
-                key={chat._id}
-              >
-                <Image
-                  borderRadius="full"
-                  boxSize="50px"
-                  src={getSenderFull(loggedUser, chat.users).pic}
-                  alt={getSender(loggedUser, chat.users)}
-                />
-                <Box
-                 ml={2}>
-                <Text>
-                {!chat.isGroupChat
-                    ? getSender(loggedUser, chat.users)
-                    : chat.chatName}
-                </Text>
-                {chat.latestMessage && (
-                  <Text fontSize="xs">
-                    <b>{chat.latestMessage.sender.name} : </b>
-                    {chat.latestMessage.content.length > 50
-                      ? chat.latestMessage.content.substring(0, 51) + "..."
-                      : chat.latestMessage.content}
-                  </Text>
-                )}
-                </Box>
-              </Box>
-            ))}
-          </Stack>
-        ) : (
-          <ChatLoading />
+        {chats && chats.length > 0 ? (
+  <Stack overflowY="scroll">
+    {chats.map((chat) => (
+      <Box
+        onClick={() => setSelectedChat(chat)}
+        d="flex"
+        cursor="pointer"
+        bg={selectedChat === chat ? "#1ca9c9" : bgColor}
+        color={selectedChat === chat ? "white" : txtColor}
+        px={3}
+        py={2}
+        borderRadius="lg"
+        key={chat._id}
+      >
+        {/* Проверка на наличие sender и изображения */}
+        {chat.users && chat.users.length > 0 && (
+          <Image
+            borderRadius="full"
+            boxSize="50px"
+            src={getSenderFull(chat.users)?.pic || '/default-pic.png'}
+            alt={getSender(chat.users) || 'Sender'}
+          />
         )}
+        <Box ml={2}>
+          <Text>
+            {!chat.isGroupChat
+              ? getSender(chat.users)
+              : chat.chatName}
+          </Text>
+          {chat.latestMessage && (
+            <Text fontSize="xs">
+              <b>{chat.latestMessage.sender.name} : </b>
+              {chat.latestMessage.content.length > 50
+                ? chat.latestMessage.content.substring(0, 51) + "..."
+                : chat.latestMessage.content}
+            </Text>
+          )}
+        </Box>
+      </Box>
+    ))}
+  </Stack>
+) : (
+  <ChatLoading />
+)}
+
       </Box>
     </Box>
   );
