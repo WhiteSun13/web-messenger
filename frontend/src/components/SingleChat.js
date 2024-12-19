@@ -3,7 +3,7 @@ import { Input } from "@chakra-ui/input";
 import { Box, Text, Image } from "@chakra-ui/react";
 import { IconButton, Spinner, useToast, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { ArrowBackIcon, AttachmentIcon, EmailIcon } from "@chakra-ui/icons";
 import ProfileModal from "./miscellaneous/ProfileModal";
@@ -144,27 +144,34 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
+  const processedNotifications = useRef(new Set()); // Используем useRef для сохранения состояния между рендерами
+
   useEffect(() => {
-    const processedNotifications = new Set(); // Набор для отслеживания отправленных уведомлений
-  
     socket.on("message received", (newMessageReceived) => {
       if (
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessageReceived.chat._id
       ) {
-        // Проверяем, было ли уже отправлено уведомление для этого сообщения
         if (
           !notification.includes(newMessageReceived) &&
-          !processedNotifications.has(newMessageReceived._id)
+          !processedNotifications.current.has(newMessageReceived._id)
         ) {
           setNotification([newMessageReceived, ...notification]);
-          processedNotifications.add(newMessageReceived._id); // Добавляем ID сообщения в набор
+          processedNotifications.current.add(newMessageReceived._id); // Добавляем ID сообщения в текущий реф
           setFetchAgain(!fetchAgain);
-  
+
           if (Notification.permission === "granted") {
-            new Notification(newMessageReceived.chat.users[0].name, {
-              body: newMessageReceived.content,
-            });
+            if (newMessageReceived.chat.isGroupChat){
+              new Notification(newMessageReceived.chat.chatName, {
+                body: newMessageReceived.content,
+                icon: newMessageReceived.sender.pic,
+              });
+            } else {
+              new Notification(newMessageReceived.chat.users[0].name, {
+                body: newMessageReceived.content,
+                icon: newMessageReceived.sender.pic,
+              });
+            }
           }
         }
       } else {
@@ -268,7 +275,7 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
               </Box>
             )}
 
-            {istyping && (
+            {/* {istyping && (
               <Box mb={3}>
                 <Lottie
                   options={{
@@ -283,7 +290,7 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
                   style={{ marginBottom: 15, marginLeft: 0 }}
                 />
               </Box>
-            )}
+            )} */}
 
             <FormControl onKeyDown={sendMessageEnter} isRequired mt={3} d="flex" alignItems="center">
               <Input

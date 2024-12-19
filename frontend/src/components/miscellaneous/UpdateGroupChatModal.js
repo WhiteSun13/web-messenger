@@ -17,6 +17,7 @@ import {
   Box,
   IconButton,
   Spinner,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { ChatState } from "../../Context/ChatProvider";
 import UserBadgeItem from "../UserComponent/UserBadgeItem";
@@ -29,6 +30,8 @@ function UpdateGroupChatModal({ fetchAgain, setFetchAgain, fetchMessages }) {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [renameLoading, setRenameLoading] = useState(false);
+
+  const txtColorModeValue = useColorModeValue("black", "white");
 
   const toast = useToast();
 
@@ -211,7 +214,7 @@ function UpdateGroupChatModal({ fetchAgain, setFetchAgain, fetchMessages }) {
 
   return (
     <>
-      <IconButton d={{ base: "flex" }} onClick={onOpen} icon={<ViewIcon />} color="black"/>
+      <IconButton d={{ base: "flex" }} onClick={onOpen} icon={<ViewIcon />} color={txtColorModeValue}/>
 
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />

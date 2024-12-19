@@ -112,8 +112,12 @@ function MyChats({ fetchAgain }) {
           <Image
             borderRadius="full"
             boxSize="50px"
-            src={getSenderFull(chat.users)?.pic || '/default-pic.png'}
-            alt={getSender(chat.users) || 'Sender'}
+            src={!chat.isGroupChat
+              ? getSenderFull(chat.users).pic
+              : chat.latestMessage.sender.pic}
+            alt={!chat.isGroupChat
+              ? getSender(chat.users)
+              : chat.chatName}
           />
         )}
         <Box ml={2}>
