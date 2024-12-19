@@ -75,4 +75,34 @@ const allUsers = asyncHandler(async (req, res) => {
   res.send(users);
 });
 
-module.exports = { registerUser, authUser, allUsers };
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { userId, newName, newPic } = req.body;
+
+  if (!userId) {
+    res.status(400);
+    throw new Error("Необходимо указать ID пользователя");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("Пользователь не найден");
+  }
+
+  if (newName) user.name = newName;
+  if (newPic) user.pic = newPic;
+
+  const updatedUser = await user.save();
+
+  res.json({
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    pic: updatedUser.pic,
+    createdAt: updatedUser.createdAt,
+    token: generateToken(updatedUser._id),
+  });
+});
+
+module.exports = { registerUser, authUser, allUsers, updateUserProfile };

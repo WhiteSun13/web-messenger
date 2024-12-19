@@ -26,6 +26,7 @@ import {
 import { BellIcon, SunIcon, MoonIcon} from "@chakra-ui/icons";
 import { ChatState } from "../../Context/ChatProvider";
 import ProfileModal from "./ProfileModal";
+import ProfileUpdateModal from "./ProfileUpdateModal";
 import axios from "axios";
 import ChatLoading from "../ChatLoading";
 import UserListItem from "../UserComponent/UserListItem";
@@ -124,6 +125,13 @@ function SideDrawer() {
     }
   };
 
+  const onUpdateUser = (updatedUser) => {
+    // Обновляем информацию о пользователе в состоянии
+    localStorage.setItem("userInfo", JSON.stringify(updatedUser));
+    window.location.reload(); // Перезагрузка страницы для обновления UI
+  };
+  
+
   return (
     <>
       <Box
@@ -191,7 +199,9 @@ function SideDrawer() {
               <ProfileModal user={user}>
                 <MenuItem>Профиль</MenuItem>
               </ProfileModal>
-              {/* <MenuItem>Изменить профиль</MenuItem> */}
+              <ProfileUpdateModal user={user} onUpdateUser={onUpdateUser}>
+                <MenuItem>Изменить профиль</MenuItem>
+              </ProfileUpdateModal>
               <MenuDivider />
               <MenuItem onClick={logoutHandler}>Выйти</MenuItem>
             </MenuList>
