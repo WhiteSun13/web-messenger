@@ -191,7 +191,7 @@ function SideDrawer() {
               <ProfileModal user={user}>
                 <MenuItem>Профиль</MenuItem>
               </ProfileModal>
-              <MenuItem>Изменить профиль</MenuItem>
+              {/* <MenuItem>Изменить профиль</MenuItem> */}
               <MenuDivider />
               <MenuItem onClick={logoutHandler}>Выйти</MenuItem>
             </MenuList>

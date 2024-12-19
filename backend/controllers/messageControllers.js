@@ -16,6 +16,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     content: content || "",
     image: image || null,
     chat: chatId,
+    timestamp: new Date(),  // Можно добавить дату, если она нужна явно
   };
 
   try {

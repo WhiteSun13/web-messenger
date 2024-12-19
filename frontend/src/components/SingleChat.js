@@ -5,7 +5,7 @@ import { IconButton, Spinner, useToast, useColorMode, useColorModeValue } from "
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ArrowBackIcon, AttachmentIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon, AttachmentIcon, EmailIcon } from "@chakra-ui/icons";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import { ChatState } from "../Context/ChatProvider";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
@@ -73,8 +73,12 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
     }
   };
 
+  const sendMessageEnter = async (e) => {
+    if (e.key === "Enter") {sendMessage();};
+  }
+
   const sendMessage = async (e) => {
-    if (e.key === "Enter" && (newMessage || selectedFile)) {
+    if (newMessage || selectedFile) {
       socket.emit("stop typing", selectedChat._id);
       try {
         const config = {
@@ -281,7 +285,7 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
               </Box>
             )}
 
-            <FormControl onKeyDown={sendMessage} isRequired mt={3} d="flex" alignItems="center">
+            <FormControl onKeyDown={sendMessageEnter} isRequired mt={3} d="flex" alignItems="center">
               <Input
                 variant="filled"
                 placeholder="Введите сообщение..."
@@ -305,6 +309,14 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
                 isDisabled={uploadingImage}
                 display="none"
                 id="file-input"
+              />
+              {/* Кнопка отправки сообщения */}
+              <IconButton
+                icon={<EmailIcon />}
+                colorScheme="blue"
+                onClick={sendMessage}
+                ml={2}
+                isDisabled={uploadingImage || !newMessage.trim() && !selectedFile}
               />
             </FormControl>
           </Box>

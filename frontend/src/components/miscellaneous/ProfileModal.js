@@ -8,7 +8,6 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
   IconButton,
   Text,
   Image,
@@ -17,7 +16,19 @@ import {
 
 function ProfileModal({ user, children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const txtColorModeValue = useColorModeValue("black","white");
+  const txtColorModeValue = useColorModeValue("black", "white");
+
+  // Функция для форматирования даты
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString("ru-RU", {
+      weekday: "long", // день недели
+      year: "numeric", // год
+      month: "long", // месяц
+      day: "numeric", // день месяца
+    });
+  };
+
   return (
     <>
       {children ? (
@@ -55,6 +66,15 @@ function ProfileModal({ user, children }) {
               fontFamily="Noto sans"
             >
               Email: {user.email}
+            </Text>
+
+            {/* Отображаем дату регистрации */}
+            <Text
+              fontSize="20px"
+              fontFamily="Noto sans"
+              color="gray.500"
+            >
+              Дата регистрации: {formatDate(user.createdAt)}
             </Text>
           </ModalBody>
           <ModalFooter>

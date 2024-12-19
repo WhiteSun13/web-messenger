@@ -17,13 +17,14 @@ const userSchema = mongoose.Schema(
     pic: {
       type: String,
       default:
-        `https://api.dicebear.com/9.x/identicon/png?size=750&backgroundColor=ffffff&seed=${generateSecureRandomString(20)}`,
+        `https://api.dicebear.com/9.x/identicon/png?size=750&backgroundColor=ffffff&seed=${generateSecureRandomString(10)}`,
     },
     isAdmin: {
       type: Boolean,
       required: true,
       default: false,
     },
+    timestamp: { type: Date, default: Date.now },
   },
   {
     timestamps: true,
